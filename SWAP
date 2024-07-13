@@ -1,0 +1,46 @@
+import requests
+from bs4 import BeautifulSoup
+import smtplib
+from email.mime.text import MIMEText
+import time
+
+def check_for_usd_jpy_swap():
+    url = "https://www.newyorkfed.org/markets/desk-operations/central-bank-liquidity-swap-operations"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    # This is a placeholder. You'll need to inspect the actual page structure
+    # to find the correct element that indicates a new USD-JPY swap
+    swap_element = soup.find('div', class_='usd-jpy-swap')
+    
+    return swap_element is not None
+
+def send_email():
+    sender = "your_email@example.com"
+    recipient = "michaelg13@gmail.com"
+    subject = "New USD-JPY Swap Posted"
+    body = "A new US Dollar-Japanese Yen swap has been posted on the New York Fed website."
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = recipient
+
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    smtp_username = "your_email@gmail.com"
+    smtp_password = "your_app_password"
+
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        server.send_message(msg)
+
+def main():
+    while True:
+        if check_for_usd_jpy_swap():
+            send_email()
+        time.sleep(3600)  # Check every hour
+
+if __name__ == "__main__":
+    main()
